@@ -22,3 +22,9 @@ optimized = optimize_sharpe_ratio(stocks, start, rf_return)
 Which means you should invest 50% into CSCO and 50% into WFC. If you don't want to
 invest that much into just two stocks change the `max_weight` parameter to a lower
 value.
+
+## Dependencies
+scipy 0.16.0
+numpy 1.11.1
+pandas 0.18.1
+requests 2.9.1
