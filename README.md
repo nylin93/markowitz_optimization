@@ -24,7 +24,7 @@ invest that much into just two stocks change the `max_weight` parameter to a low
 value.
 
 ## Dependencies
-scipy 0.16.0
-numpy 1.11.1
-pandas 0.18.1
-requests 2.9.1
+* scipy 0.16.0
+* numpy 1.11.1
+* pandas 0.18.1
+* requests 2.9.1
