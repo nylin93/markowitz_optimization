@@ -126,7 +126,3 @@ def _annualize_monthly_returns(prices):
 			for i in range(1, len(prices))])
 	return (1 + diff.mean())**12 - 1
 
-if __name__ == "__main__":
-	stocks = ['BEN', 'WFM', 'SPY', 'CSCO', 'NKE', 'SBUX']	
-	weights = optimize_sharpe_ratio(stocks, 2013, .015)
-	print(weights)

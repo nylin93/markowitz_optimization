@@ -1,3 +1,5 @@
-# A python implementation of Harry Markowitz's [mean variance optimization](https://en.wikipedia.org/wiki/Modern_portfolio_theory) algorithm
-We borrow heavily from the implementation found here at [quantandfinancial] (http://www.quantandfinancial.com/2013/07/mean-variance-portfolio-optimization.html)
+# Mean Variance Optimization 
+This is an implementation of [Mean Variance Optimization] (https://en.wikipedia.org/wiki/Modern_portfolio_theory) and was build with much inspiration from the one found at [quantandfinancial] (http://www.quantandfinancial.com/2013/07/mean-variance-portfolio-optimization.html). 
+
+This implementation consists of a simpler interface that exposes two top-level methods `optimize_sharpe_ratio` which optimizes the portfolio in regards to the Sharpe Ratio, and `optimize_return_amount` which optimizes the portfolio with the minimum variance for a requested return on the portfolio
 
