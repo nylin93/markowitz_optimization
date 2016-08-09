@@ -1,9 +1,8 @@
-import yahoo
+import standardandpoor, yahoo
 import numpy as np
 import scipy.optimize
 
-
-def optimize_sharpe_ratio(symbols, start, rf_return, max_weight=0.5):
+def optimize_sharpe(symbols, start, rf_return, max_weight=0.5):
 	'''
 	optimize_sharpe_ratio
 
@@ -17,9 +16,8 @@ def optimize_sharpe_ratio(symbols, start, rf_return, max_weight=0.5):
 	returns: dictionary of strings mapped to floats (stock -> weight)
 	'''
 
-	raw_returns = [yahoo.monthly_returns(sym, start) for sym in symbols]	
-	mu = [_annualize_monthly_returns(ret) for ret in raw_returns]
-	sigma = np.cov(raw_returns)
+	returns = _returns(symbols, start)
+	mu, sigma = _mu_sigma(returns)
 
 	initial_X = np.ones(len(mu))/len(mu)
 	bounds = [(0., max_weight) for i in range(len(mu))]
@@ -30,10 +28,9 @@ def optimize_sharpe_ratio(symbols, start, rf_return, max_weight=0.5):
 			(mu, sigma, rf_return), method='SLSQP', constraints=constraints, 
 			bounds=bounds).x)
 
-	return dict(zip(symbols, optimized_weights))
+	return dict(zip(returns.keys(), optimized_weights))
 	
-
-def optimize_return_amount(symbols, start, min_return, max_weight=0.5):
+def optimize_return(symbols, start, min_return, max_weight=0.5):
 	'''
 	optimize_return_amount
 
@@ -47,9 +44,8 @@ def optimize_return_amount(symbols, start, min_return, max_weight=0.5):
 	returns: dictionary of strings mapped to floats (stock -> weight)
 	'''
 
-	raw_returns = [yahoo.monthly_returns(sym, start) for sym in symbols]	
-	mu = [_annualize_monthly_returns(ret) for ret in raw_returns]
-	sigma = np.cov(raw_returns)
+	returns = _returns(symbols, start)
+	mu, sigma = _mu_sigma(returns)
 	
 	initial_X = np.ones(len(mu))/len(mu)
 	bounds = [(0., max_weight) for i in range(len(mu))]
@@ -60,7 +56,45 @@ def optimize_return_amount(symbols, start, min_return, max_weight=0.5):
 			(mu, sigma, min_return), method='SLSQP', constraints=constraints, 
 			bounds=bounds).x)
 
-	return dict(zip(symbols, optimized_weights))
+	return dict(zip(returns.keys(), optimized_weights))
+
+def _mu_sigma(returns):
+	'''
+	_mu_sigma
+
+	Returns the expected return and the covariance matrix 
+
+	params:
+	------
+		returns: dictionary mapping symbols to Pandas series
+
+	returns: ([float], np.array of len(returns))
+	'''
+	return ([_annualize_monthly_returns(returns[k]) for k in returns], 
+			np.cov(np.array(list(returns.values()))))
+
+def _returns(symbols, start):
+	'''
+	_returns
+
+	Fetches the monthly returns from the specified start date. Since
+	some stocks have been on the market for different periods of time
+	we remove stocks that have not been on the market since specified 
+	`start` year
+
+	params:
+	------
+		symbols: list of str
+		start: int
+
+	returns: dictionary (str -> Pandas series)
+	'''
+	raw_returns = {sym: ret for (sym, ret) in 
+			zip(symbols, [yahoo.monthly_returns(sym, start) for sym in symbols])} 
+	max_len = len(raw_returns[max(raw_returns, key=lambda x: len(x))])
+	return {k: raw_returns[k] for k in raw_returns 
+			if len(raw_returns[k]) == max_len}	
+	
 
 def _sharpe_ratio(X, mu, sigma, rf_return):
 	'''
@@ -126,3 +160,10 @@ def _annualize_monthly_returns(prices):
 			for i in range(1, len(prices))])
 	return (1 + diff.mean())**12 - 1
 
+
+if __name__ == "__main__":
+	stocks = ['GM', 'CSCO', 'WFM', 'SPY']
+	result = optimize_return(stocks, 2013, .10, .40)
+	filtered = {k: result[k] for k in result if result[k] > 0}
+	print(filtered)
+	
